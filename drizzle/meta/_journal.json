@@ -1,0 +1,34 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1700264274970,
+      "tag": "0000_panoramic_rage",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1700329244277,
+      "tag": "0001_aspiring_magik",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1700502110942,
+      "tag": "0002_famous_stature",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1700513253451,
+      "tag": "0003_lowly_tombstone",
+      "breakpoints": true
+    }
+  ]
+}
