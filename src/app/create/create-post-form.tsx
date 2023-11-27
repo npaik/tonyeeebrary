@@ -19,7 +19,7 @@ export default function CreatePostForm({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const buttonDisabled = title.length < 1 || loading;
+  const buttonDisabled = title.length < 1 || author.length < 1 || !file;
 
   const computeSHA256 = async (file: File) => {
     const buffer = await file.arrayBuffer();
@@ -268,7 +268,7 @@ export default function CreatePostForm({
         <div className="flex justify-between items-center mt-5">
           <button
             type="submit"
-            className="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 cursor-not-allowed"
+            className="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
             disabled={buttonDisabled}
           >
             Post
