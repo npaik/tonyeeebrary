@@ -29,6 +29,9 @@ export default async function FeedPost({ post }: { post: Post }) {
   }
   const session = await auth();
   const seesionId = session?.user.id;
+  // console.log("session user id" + seesionId)
+  // console.log("post user id" + post.user.id)
+  // console.log(seesionId === post.user.id)
 
   return (
     <div className="grid grid-cols-3 gap-4 p-4 border-b border-gray-300 hover:bg-gray-50 transition duration-150">
