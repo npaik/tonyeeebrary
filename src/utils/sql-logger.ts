@@ -1,19 +1,19 @@
 export async function prettyPrintSQL(sql: string, params: unknown[]) {
-  console.log("send post request")
+  console.log("send post request");
   try {
-    const result = await fetch("http://127.0.0.1:4000", {
+    const result = await fetch("http://127.0.0.1:3000", {
       method: "POST",
       cache: "no-cache",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ sql, params }),
-    })
-    console.log(await result.text())
+    });
+    console.log(await result.text());
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
-  console.log("sent post request")
+  console.log("sent post request");
 }
 
 // Example usage
