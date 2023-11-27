@@ -32,6 +32,7 @@
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
     "jszip": "latest",
+    "localforage": "^1.10.0",
     "might-fail": "^0.2.0",
     "next": "latest",
     "next-auth": "beta",
