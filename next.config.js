@@ -16,10 +16,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "threads-clone-local-npaik.s3.ca-central-1.amazonaws.com",
+        hostname: "tonyeeebrary.s3.ca-central-1.amazonaws.com",
       },
     ],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
