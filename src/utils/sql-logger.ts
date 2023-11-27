@@ -1,7 +1,7 @@
 export async function prettyPrintSQL(sql: string, params: unknown[]) {
   console.log("send post request");
   try {
-    const result = await fetch("http://127.0.0.1:3000", {
+    const result = await fetch("", {
       method: "POST",
       cache: "no-cache",
       headers: {

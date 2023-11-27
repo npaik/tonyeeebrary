@@ -1,29 +1,35 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import Image from "next/image"
-import { useState } from "react"
-import { twMerge } from "tailwind-merge"
-import { createPost, getSignedURL } from "./actions"
-import ePub from "epubjs"
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+import { twMerge } from "tailwind-merge";
+import { createPost, getSignedURL } from "./actions";
+import ePub from "epubjs";
 
-export default function CreatePostForm({ user }: { user: { name?: string | null; image?: string | null } }) {
-  const [title, setTitle] = useState("")
-  const [author, setAuthor] = useState("")
-  const [file, setFile] = useState<File | null>(null) // For EPUBs
-  const [coverImageFile, setCoverImageFile] = useState<File | null>(null) // For cover images
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [statusMessage, setStatusMessage] = useState("")
-  const [loading, setLoading] = useState(false)
-  const buttonDisabled = title.length < 1 || loading
+export default function CreatePostForm({
+  user,
+}: {
+  user: { name?: string | null; image?: string | null };
+}) {
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [file, setFile] = useState<File | null>(null); // For EPUBs
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null); // For cover images
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const buttonDisabled = title.length < 1 || loading;
 
   const computeSHA256 = async (file: File) => {
-    const buffer = await file.arrayBuffer()
-    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-    return hashHex
-  }
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return hashHex;
+  };
 
   const handleUpload = async (file: File, fileCategory: "book" | "cover") => {
     const signedURLResult = await getSignedURL({
@@ -31,136 +37,146 @@ export default function CreatePostForm({ user }: { user: { name?: string | null;
       fileType: file.type,
       checksum: await computeSHA256(file),
       fileCategory: fileCategory,
-    })
+    });
 
     if (signedURLResult.failure) {
-      throw new Error(signedURLResult.failure)
+      throw new Error(signedURLResult.failure);
     }
 
-    if (!signedURLResult.success || typeof signedURLResult.success.url !== "string") {
-      throw new Error("Failed to get a valid response from getSignedURL")
+    if (
+      !signedURLResult.success ||
+      typeof signedURLResult.success.url !== "string"
+    ) {
+      throw new Error("Failed to get a valid response from getSignedURL");
     }
 
-    const { url, id: fileId } = signedURLResult.success
+    const { url, id: fileId } = signedURLResult.success;
 
     await fetch(url, {
       method: "PUT",
       headers: { "Content-Type": file.type },
       body: file,
-    })
+    });
 
-    return { fileId, fileCategory }
-  }
+    return { fileId, fileCategory };
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      let bookFileIds: number[] = []
-      let coverFileIds: number[] = []
+      let bookFileIds: number[] = [];
+      let coverFileIds: number[] = [];
 
       if (file) {
-        setStatusMessage("Uploading EPUB...")
-        const { fileId } = await handleUpload(file, "book")
-        bookFileIds.push(fileId)
+        setStatusMessage("Uploading EPUB...");
+        const { fileId } = await handleUpload(file, "book");
+        bookFileIds.push(fileId);
       }
 
       if (coverImageFile) {
-        setStatusMessage("Uploading cover image...")
-        const { fileId } = await handleUpload(coverImageFile, "cover")
-        coverFileIds.push(fileId)
+        setStatusMessage("Uploading cover image...");
+        const { fileId } = await handleUpload(coverImageFile, "cover");
+        coverFileIds.push(fileId);
       }
 
-      setStatusMessage("Creating post...")
+      setStatusMessage("Creating post...");
 
       await createPost({
         title,
         author,
         bookFileIds,
         coverFileIds,
-      })
+      });
 
-      setTitle("")
-      setAuthor("")
-      setFile(null)
-      setCoverImageFile(null)
-      setPreviewUrl(null)
-      setStatusMessage("Post successful!")
+      setTitle("");
+      setAuthor("");
+      setFile(null);
+      setCoverImageFile(null);
+      setPreviewUrl(null);
+      setStatusMessage("Post successful!");
     } catch (error) {
-      console.error(error)
-      setStatusMessage("Failed to post")
+      console.error(error);
+      setStatusMessage("Failed to post");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleEPUB = async (file: File) => {
     try {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = async (event) => {
         if (event.target) {
-          const arrayBuffer = event.target.result
+          const arrayBuffer = event.target.result;
 
           if (arrayBuffer) {
-            const book = ePub(arrayBuffer)
-            const coverUrl = await book.coverUrl()
+            const book = ePub(arrayBuffer);
+            const coverUrl = await book.coverUrl();
 
             if (coverUrl) {
-              setPreviewUrl(coverUrl)
-              const response = await fetch(coverUrl)
-              const blob = await response.blob()
-              const coverImageFile = new File([blob], "cover.jpg", { type: "image/jpeg" })
-              setCoverImageFile(coverImageFile)
+              setPreviewUrl(coverUrl);
+              const response = await fetch(coverUrl);
+              const blob = await response.blob();
+              const coverImageFile = new File([blob], "cover.jpg", {
+                type: "image/jpeg",
+              });
+              setCoverImageFile(coverImageFile);
             } else {
-              setPreviewUrl(null)
-              console.log("No cover image found for the EPUB")
+              setPreviewUrl(null);
+              console.log("No cover image found for the EPUB");
             }
           } else {
-            console.error("Failed to load file as ArrayBuffer")
-            setPreviewUrl(null)
+            console.error("Failed to load file as ArrayBuffer");
+            setPreviewUrl(null);
           }
         } else {
-          console.error("FileReader event target is null")
-          setPreviewUrl(null)
+          console.error("FileReader event target is null");
+          setPreviewUrl(null);
         }
-      }
-      reader.readAsArrayBuffer(file)
+      };
+      reader.readAsArrayBuffer(file);
     } catch (error) {
-      console.error("Error processing EPUB file with epub.js:", error)
-      setPreviewUrl(null)
+      console.error("Error processing EPUB file with epub.js:", error);
+      setPreviewUrl(null);
     }
-  }
+  };
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null
-    setFile(file)
+    const file = e.target.files?.[0] ?? null;
+    setFile(file);
 
     if (file) {
       if (file.type === "application/epub+zip") {
-        handleEPUB(file)
+        handleEPUB(file);
       } else if (file.type.startsWith("image/")) {
-        const url = URL.createObjectURL(file)
-        setPreviewUrl(url)
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
       } else {
-        setPreviewUrl(null)
+        setPreviewUrl(null);
       }
     } else {
-      setPreviewUrl(null)
+      setPreviewUrl(null);
     }
-  }
+  };
 
   const handleRemoveFile = () => {
-    setFile(null)
-    setCoverImageFile(null)
-    setPreviewUrl(null)
-  }
+    setFile(null);
+    setCoverImageFile(null);
+    setPreviewUrl(null);
+  };
 
   return (
     <>
-      <form className="max-w-lg mx-auto mt-10 p-6 bg-gray-50 rounded-lg shadow-lg" onSubmit={handleSubmit}>
+      <form
+        className="max-w-lg mx-auto mt-10 p-6 bg-gray-50 rounded-lg shadow-lg"
+        onSubmit={handleSubmit}
+      >
         {statusMessage && (
-          <p className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">{statusMessage}</p>
+          <p className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
+            {statusMessage}
+          </p>
         )}
         <div className="flex gap-4 items-start pb-4 w-full">
           <div className="rounded-full h-12 w-12 overflow-hidden relative">
@@ -200,9 +216,19 @@ export default function CreatePostForm({ user }: { user: { name?: string | null;
             {previewUrl && file && (
               <div className="mt-4">
                 {file.type.startsWith("image/") ? (
-                  <img src={previewUrl} alt="Selected file" />
+                  <Image
+                    src={previewUrl}
+                    alt="Selected file"
+                    width={128}
+                    height={128}
+                  />
                 ) : file.type === "application/epub+zip" ? (
-                  <img src={previewUrl} alt="EPUB cover" />
+                  <Image
+                    src={previewUrl}
+                    alt="EPUB cover"
+                    width={400}
+                    height={600}
+                  />
                 ) : null}
                 <button
                   type="button"
@@ -250,5 +276,5 @@ export default function CreatePostForm({ user }: { user: { name?: string | null;
         </div>
       </form>
     </>
-  )
+  );
 }

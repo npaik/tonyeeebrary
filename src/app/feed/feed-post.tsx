@@ -1,10 +1,10 @@
-import Image from "next/image"
-import Link from "next/link"
-import { type Post } from "@/db/queries/postsFeed"
-import PostActions from "@/components/post-actions"
+import Image from "next/image";
+import Link from "next/link";
+import { type Post } from "@/db/queries/postsFeed";
+import PostActions from "@/components/post-actions";
 
-import timeAgoShort from "@/utils/timeAgoShort"
-import { deletePost } from "./actions"
+import timeAgoShort from "@/utils/timeAgoShort";
+import { deletePost } from "./actions";
 
 export default function FeedPost({ post }: { post: Post }) {
   function PostBooks() {
@@ -16,14 +16,16 @@ export default function FeedPost({ post }: { post: Post }) {
               className="object-cover"
               src={post.covers?.url || "/default-cover.jpg"}
               alt="EPUB Cover"
-              layout="fill"
-              objectFit="cover"
+              width={200}
+              height={300}
+              // layout="fill"
+              // objectFit="cover"
             />
           </div>
         </Link>
-      )
+      );
     }
-    return null
+    return null;
   }
 
   return (
@@ -34,7 +36,9 @@ export default function FeedPost({ post }: { post: Post }) {
       <div className="col-span-2 space-y-4">
         <h2 className="text-lg font-semibold line-clamp-2">{post.title}</h2>
         <p className="text-sm text-gray-600">{post.author}</p>
-        <p className="text-xs text-gray-500">{timeAgoShort(new Date(post.createdAt))}</p>
+        <p className="text-xs text-gray-500">
+          {timeAgoShort(new Date(post.createdAt))}
+        </p>
         {post.books && post.books.url && (
           <div className="flex justify-between items-center mt-2">
             <Link
@@ -43,7 +47,11 @@ export default function FeedPost({ post }: { post: Post }) {
             >
               View
             </Link>
-            <Link href={post.books.url} download className="text-blue-600 hover:text-blue-800 transition duration-150">
+            <Link
+              href={post.books.url}
+              download
+              className="text-blue-600 hover:text-blue-800 transition duration-150"
+            >
               Download
             </Link>
             <PostActions onDelete={deletePost.bind(null, post.id)} />
@@ -51,5 +59,5 @@ export default function FeedPost({ post }: { post: Post }) {
         )}
       </div>
     </div>
-  )
+  );
 }
