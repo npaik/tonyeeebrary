@@ -6,7 +6,9 @@ import PostActions from "@/components/post-actions";
 import timeAgoShort from "@/utils/timeAgoShort";
 import { deletePost } from "./actions";
 
-export default function FeedPost({ post }: { post: Post }) {
+import { auth } from "@/auth";
+
+export default async function FeedPost({ post }: { post: Post }) {
   function PostBooks() {
     if (post.books) {
       return (
@@ -18,8 +20,6 @@ export default function FeedPost({ post }: { post: Post }) {
               alt="EPUB Cover"
               width={200}
               height={300}
-              // layout="fill"
-              // objectFit="cover"
             />
           </div>
         </Link>
@@ -27,6 +27,8 @@ export default function FeedPost({ post }: { post: Post }) {
     }
     return null;
   }
+  const session = await auth();
+  const seesionId = session?.user.id;
 
   return (
     <div className="grid grid-cols-3 gap-4 p-4 border-b border-gray-300 hover:bg-gray-50 transition duration-150">
@@ -54,7 +56,9 @@ export default function FeedPost({ post }: { post: Post }) {
             >
               Download
             </Link>
-            <PostActions onDelete={deletePost.bind(null, post.id)} />
+            {seesionId === post.user.id && (
+              <PostActions onDelete={deletePost.bind(null, post.id)} />
+            )}
           </div>
         )}
       </div>
