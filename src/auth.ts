@@ -1,31 +1,36 @@
 import NextAuth, { NextAuthConfig } from "next-auth";
-import GitHub from "next-auth/providers/github";
+import GitHubProvider from "next-auth/providers/github";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/db";
 
 export const authConfig = {
-  providers: [GitHub],
+  providers: [
+    GitHubProvider({
+      clientId: process.env.AUTH_GITHUB_ID,
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
+    }),
+  ],
   adapter: DrizzleAdapter(db),
   callbacks: {
     async session({ session, user }) {
+      // Attach the user's ID to the session
       session.user.id = user.id;
       return session;
     },
-    authorized({ auth, request: { nextUrl } }) {
-      return true;
+    async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const paths = ["/"];
-      const isProtected = paths.some((path) =>
+      const protectedPaths = ["/protected-path"]; // Define your protected paths here
+      const isProtected = protectedPaths.some((path) =>
         nextUrl.pathname.startsWith(path)
       );
 
       if (isProtected && !isLoggedIn) {
-        const redirectUrl = new URL("api/auth/signin", nextUrl.origin);
+        const redirectUrl = new URL("/api/auth/signin", nextUrl.origin);
         redirectUrl.searchParams.append("callbackUrl", nextUrl.href);
         return Response.redirect(redirectUrl);
       }
 
-      return true;
+      return true; // Allow access for non-protected routes
     },
   },
 } satisfies NextAuthConfig;

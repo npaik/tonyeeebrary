@@ -1,24 +1,24 @@
-import FeedPost from "@/app/feed/feed-post"
-import { postsFeedQuery } from "@/db/queries/postsFeed"
-import Link from "next/link"
+import FeedPost from "@/app/feed/feed-post";
+import { postsFeedQuery } from "@/db/queries/postsFeed";
+import Link from "next/link";
 
-import { auth, signOut } from "@/auth"
-import SignoutButton from "@/components/sign-out-button"
+import { auth, signOut } from "@/auth";
+import SignoutButton from "@/components/sign-out-button";
 
-import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
-import { Suspense } from "react"
-import Loading from "./loading"
+import { Suspense } from "react";
+import Loading from "./loading";
 
 export default async function home() {
-  revalidatePath("/")
-  const session = await auth()
+  revalidatePath("/");
+  const session = await auth();
   if (!session?.user) {
-    redirect("/api/auth/signin?callbackUrl=/")
+    redirect("/api/auth/signin?callbackUrl=/");
   }
 
-  const posts = await postsFeedQuery.execute()
+  const posts = await postsFeedQuery.execute();
 
   return (
     <>
@@ -31,5 +31,5 @@ export default async function home() {
         </div>
       </div>
     </>
-  )
+  );
 }
